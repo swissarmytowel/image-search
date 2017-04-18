@@ -19,9 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AverageColorExtractor.h" />
     <ClInclude Include="ObjectDetector.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AverageColorExtractor.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ObjectDetector.cpp" />
   </ItemGroup>

@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include "ObjectDetector.h"
+#include "AverageColorExtractor.h"
 
 
 int main ( int argc, char** argv )
@@ -24,11 +25,21 @@ int main ( int argc, char** argv )
 		return EXIT_FAILURE;
 	}
 
-	ObjectDetector od ( image );
+	cv::Mat tmp;
 
-	cv::namedWindow ( "result", cv::WindowFlags::WINDOW_KEEPRATIO );
+	image.convertTo ( tmp, CV_32F, 1.f / 255.f );
 
-	cv::imshow ( "result", od.detectROI ( od.preprocess () ) );
+	ObjectDetector od ( tmp );
+
+	AverageColorExtractor extr ( tmp, od.detectROI ( od.preprocess () ) );
+
+	cv::namedWindow ( "result", cv::WindowFlags::WINDOW_AUTOSIZE );
+
+	cv::namedWindow ( "source", cv::WINDOW_AUTOSIZE );
+
+	cv::imshow ( "result", extr.get () );
+
+	cv::imshow ( "source", image );
 
 	cv::waitKey ();
 

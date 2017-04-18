@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <functional>
 
 #include"opencv2\core.hpp"
 #include"opencv2\world.hpp"
@@ -16,23 +15,23 @@ class ObjectDetector
 {
 public:
 	ObjectDetector ();
-	ObjectDetector (cv::Mat &image);
+	ObjectDetector ( cv::Mat &image );
 
 	cv::Mat getSourceImage ();
 
-	void setSourceImage (const cv::Mat &newImage );
+	void setSourceImage ( const cv::Mat &newImage );
 
 	void selectROI ( cv::Mat &image );
 
 	cv::Mat preprocess ();
 
-	cv::Mat detectROI (const cv::Mat &preprocessedImage);
+	std::vector<cv::Point>  detectROI ( const cv::Mat &preprocessedImage );
 
 	~ObjectDetector ();
 
 private:
 	cv::Mat _sourceImage;
-	std::vector<int> coords;
+
 	bool _hasAlphaChanel;
 };
 

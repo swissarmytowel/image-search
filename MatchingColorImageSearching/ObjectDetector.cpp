@@ -6,8 +6,6 @@ ObjectDetector::ObjectDetector ()
 ObjectDetector::ObjectDetector ( cv::Mat & image )
 {
 	_sourceImage = image;
-
-	_hasAlphaChanel = image.channels () == 3 ? false : true;
 }
 
 cv::Mat ObjectDetector::getSourceImage ()
@@ -30,23 +28,21 @@ cv::Mat ObjectDetector::preprocess ()
 	cv::ColorConversionCodes conversionCode = _hasAlphaChanel ? cv::ColorConversionCodes::COLOR_BGRA2GRAY : cv::ColorConversionCodes::COLOR_BGR2GRAY;
 
 	//Converts image to grayscale
-	cv::cvtColor ( temporaryImage, temporaryImage, conversionCode );
-	cv::Mat s;
-	//cv::bilateralFilter ( temporaryImage, s, 17 ,50.0, 10.0 );
+	cv::cvtColor ( temporaryImage, temporaryImage, cv::ColorConversionCodes::COLOR_BGR2GRAY );
 
 	cv::GaussianBlur ( temporaryImage, temporaryImage, cv::Size ( 3, 3 ), 0 );
 
-	
-	double minGray, maxGray;
+	double minimalGrayValue, maximalGrayValue;
 
-	cv::minMaxLoc ( temporaryImage, &minGray, &maxGray );
+	cv::minMaxLoc ( temporaryImage, &minimalGrayValue, &maximalGrayValue );
 
-	minGray = 115;
+	//Magic number specified after number of tests to give the most accurate, yet undistorted result
+	minimalGrayValue = 0.4555;
 
-	double inputRange = maxGray - minGray;
+	double inputRange = maximalGrayValue - minimalGrayValue;
 
-	double alpha = 255.0 / inputRange; // alpha expands current range. MaxGray will be 255
-	double beta = -minGray * alpha;    // beta shifts current range so that minGray will go to 0
+	double alpha = 1.0 / inputRange; // alpha expands current range. MaxGray will be 255
+	double beta = -minimalGrayValue * alpha;    // beta shifts current range so that minGray will go to 0
 
 	temporaryImage.convertTo ( temporaryImage, -1, alpha, beta );
 
@@ -54,23 +50,30 @@ cv::Mat ObjectDetector::preprocess ()
 
 	cv::threshold ( temporaryImage, temporaryImage, 0, 255, cv::THRESH_BINARY );
 
-	//
-
 	return temporaryImage;
 }
 
 
-cv::Mat ObjectDetector::detectROI ( const cv::Mat & preprocessedImage )
+std::vector<cv::Point>  ObjectDetector::detectROI ( const cv::Mat & preprocessedImage )
 {
-	cv::Mat tmp, tp,tp1;
+	std::vector<cv::Point>  foundNonBlackLocations;
 
-	cv::cvtColor ( preprocessedImage, tp, cv::ColorConversionCodes::COLOR_GRAY2BGR );
+	cv::Mat temporaryImage;
 
-	tmp = _sourceImage - tp;
+	preprocessedImage.convertTo ( temporaryImage, CV_8UC1 );
 
-	//cv::Canny ( tmp, tmp, 50, 255 );
+	for ( int i = 0; i < temporaryImage.rows; ++i )
+	{
+		for ( int j = 0; j < temporaryImage.cols; j++ )
+		{
+			if ( temporaryImage.at<uchar> ( i, j ) == 0 )
+			{
+				foundNonBlackLocations.push_back ( cv::Point ( i, j ) );
+			}
+		}
+	}
 
-	return tmp;
+	return foundNonBlackLocations;
 }
 
 ObjectDetector::~ObjectDetector ()
