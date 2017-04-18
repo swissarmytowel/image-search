@@ -15,7 +15,7 @@ int main ( int argc, char** argv )
 
 		if ( image.empty () )
 		{
-			throw  cv::Exception ( 0, " Can't read image", "main() ", "main.cpp", 17 );
+			throw  cv::Exception ( 0, " Can't read image", "main() ", "main.cpp", 14 );
 		}
 	}
 	catch ( cv::Exception error )
