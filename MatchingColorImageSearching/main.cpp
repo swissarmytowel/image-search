@@ -10,13 +10,15 @@ int main ( int argc, char** argv )
 {
 	cv::Mat image;
 
+	std::string imageName = "some image.jpg";
+
 	try
 	{
-		image = cv::imread ( "some image.jpg" );
+		image = cv::imread ( imageName );
 
 		if ( image.empty () )
 		{
-			throw  cv::Exception ( 0, " Can't read image", "main() ", "main.cpp", 14 );
+			throw  cv::Exception ( 0, " Can't read image \"" + imageName + "\" ", "int main ( int argc, char** argv ) ", "main.cpp", 17 );
 		}
 	}
 	catch ( cv::Exception error )
