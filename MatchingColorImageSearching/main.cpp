@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+
 #include "ObjectDetector.h"
 #include "AverageColorExtractor.h"
 
@@ -11,7 +12,7 @@ int main ( int argc, char** argv )
 
 	try
 	{
-		image = cv::imread ( "woman.jpg" );
+		image = cv::imread ( "some image.jpg" );
 
 		if ( image.empty () )
 		{
@@ -25,19 +26,19 @@ int main ( int argc, char** argv )
 		return EXIT_FAILURE;
 	}
 
-	cv::Mat tmp;
+	cv::Mat temporaryImage;
 
-	image.convertTo ( tmp, CV_32F, 1.f / 255.f );
+	image.convertTo ( temporaryImage, CV_32F, 1.f / 255.f );
 
-	ObjectDetector od ( tmp );
+	colorSearching::ObjectDetector detector ( temporaryImage );
 
-	AverageColorExtractor extr ( tmp, od.detectROI ( od.preprocess () ) );
+	colorSearching::AverageColorExtractor extractor ( temporaryImage, detector.detectROI () );
 
 	cv::namedWindow ( "result", cv::WindowFlags::WINDOW_AUTOSIZE );
 
 	cv::namedWindow ( "source", cv::WINDOW_AUTOSIZE );
 
-	cv::imshow ( "result", extr.get () );
+	cv::imshow ( "result", ( extractor.getAverageColorPlate () ) );
 
 	cv::imshow ( "source", image );
 
@@ -45,3 +46,4 @@ int main ( int argc, char** argv )
 
 	return EXIT_SUCCESS;
 }
+

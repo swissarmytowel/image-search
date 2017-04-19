@@ -2,36 +2,33 @@
 
 #include <vector>
 
-#include"opencv2\core.hpp"
-#include"opencv2\world.hpp"
-#include "opencv2\cvconfig.h"
-#include "opencv2\opencv.hpp"
-#include"opencv2\highgui.hpp"
+#include "opencv2\core.hpp"
+#include "opencv2\world.hpp"
+#include "opencv2\highgui.hpp"
 #include "opencv2\imgproc.hpp"
 #include "opencv2\objdetect.hpp"
-#include "opencv2\opencv_modules.hpp"
 
-class ObjectDetector
+namespace colorSearching
 {
-public:
-	ObjectDetector ();
-	ObjectDetector ( cv::Mat &image );
+	class ObjectDetector
+	{
+	public:
+		ObjectDetector ();
+		ObjectDetector ( cv::Mat &image );
 
-	cv::Mat getSourceImage ();
+		cv::Mat getSourceImage ();
 
-	void setSourceImage ( const cv::Mat &newImage );
+		void setSourceImage ( const cv::Mat &newImage );
 
-	void selectROI ( cv::Mat &image );
+		std::vector<cv::Point>  detectROI ();
 
-	cv::Mat preprocess ();
+		~ObjectDetector ();
 
-	std::vector<cv::Point>  detectROI ( const cv::Mat &preprocessedImage );
+	private:
+		cv::Mat _sourceImage;
 
-	~ObjectDetector ();
+		bool _hasAlphaChanel;
 
-private:
-	cv::Mat _sourceImage;
-
-	bool _hasAlphaChanel;
-};
-
+		cv::Mat _preprocess ();
+	};
+}

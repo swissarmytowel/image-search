@@ -1,6 +1,8 @@
 #include "AverageColorExtractor.h"
 
-std::vector<cv::Scalar> AverageColorExtractor::_colors = std::vector<cv::Scalar> ();
+using namespace colorSearching;
+
+std::vector<cv::Scalar> AverageColorExtractor::nonBlackColors = std::vector<cv::Scalar> ();
 
 AverageColorExtractor::AverageColorExtractor ()
 { }
@@ -9,12 +11,12 @@ AverageColorExtractor::AverageColorExtractor ( const cv::Mat &image, std::vector
 {
 	_image = image;
 
-	_extractedColor = calculateAverageColor ( nonBlackPixelsLocation );
+	_extractedAverageColor = calculateAverageColor ( nonBlackPixelsLocation );
 }
 
 cv::Scalar AverageColorExtractor::getAverageColor ()
 {
-	return _extractedColor;
+	return _extractedAverageColor;
 }
 
 cv::Scalar AverageColorExtractor::calculateAverageColor ( std::vector<cv::Point> nonBlackPixelsLocation )
@@ -25,7 +27,7 @@ cv::Scalar AverageColorExtractor::calculateAverageColor ( std::vector<cv::Point>
 	{
 		for ( int i = 0; i < 3; ++i )
 		{
-			averageColor [ i ] += _image.at<cv::Vec3f> ( it.x, it.y ) [ i ];
+			averageColor [ i ] += static_cast< double >(_image.at<cv::Vec3f> ( it.x, it.y ) [ i ]);
 		}
 	}
 
@@ -39,11 +41,13 @@ AverageColorExtractor::~AverageColorExtractor ()
 { }
 
 
-cv::Mat AverageColorExtractor::get ()
+cv::Mat AverageColorExtractor::getAverageColorPlate ()
 {
 	cv::Mat colorPlate ( cv::Size ( 200, 200 ), _image.type () );
 
-	colorPlate = _extractedColor;
+	colorPlate = _extractedAverageColor;
 
-	return colorPlate;
+	LABConverter converter ( colorPlate );
+
+	return converter.convert();
 }

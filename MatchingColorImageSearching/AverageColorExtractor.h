@@ -2,34 +2,36 @@
 
 #include <vector>
 
-#include"opencv2\core.hpp"
-#include"opencv2\world.hpp"
-#include "opencv2\cvconfig.h"
-#include "opencv2\opencv.hpp"
-#include"opencv2\highgui.hpp"
+#include "opencv2\core.hpp"
+#include "opencv2\world.hpp"
+#include "opencv2\highgui.hpp"
 #include "opencv2\imgproc.hpp"
 #include "opencv2\objdetect.hpp"
-#include "opencv2\opencv_modules.hpp"
 
-class AverageColorExtractor
+#include "ColorSpaceConverter.h"
+
+namespace colorSearching
 {
-public:
-	AverageColorExtractor ();
-	
-	AverageColorExtractor (const cv::Mat &image, std::vector<cv::Point> nonBlackPixelsLocation);
+	class AverageColorExtractor
+	{
+	public:
+		AverageColorExtractor ();
 
-	cv::Scalar getAverageColor ();
+		AverageColorExtractor ( const cv::Mat &image, std::vector<cv::Point> nonBlackPixelsLocation );
 
-	cv::Scalar calculateAverageColor (std::vector<cv::Point> nonBlackPixelsLocation);
+		cv::Scalar getAverageColor ();
 
-	~AverageColorExtractor ();
+		cv::Scalar calculateAverageColor ( std::vector<cv::Point> nonBlackPixelsLocation );
 
-	cv::Mat get ();
+		~AverageColorExtractor ();
 
-	static 	std::vector<cv::Scalar> _colors;
+		cv::Mat getAverageColorPlate ();
 
-private:
-	cv::Mat _image;
+		static 	std::vector<cv::Scalar> nonBlackColors;
 
-	cv::Scalar _extractedColor;
-};
+	private:
+		cv::Mat _image;
+
+		cv::Scalar _extractedAverageColor;
+	};
+}

@@ -1,5 +1,7 @@
 #include "ObjectDetector.h"
 
+using namespace colorSearching;
+
 ObjectDetector::ObjectDetector ()
 { }
 
@@ -18,10 +20,7 @@ void ObjectDetector::setSourceImage ( const cv::Mat & newImage )
 	_sourceImage = newImage;
 }
 
-void ObjectDetector::selectROI ( cv::Mat & image )
-{ }
-
-cv::Mat ObjectDetector::preprocess ()
+cv::Mat ObjectDetector::_preprocess ()
 {
 	cv::Mat temporaryImage ( _sourceImage );
 
@@ -41,7 +40,7 @@ cv::Mat ObjectDetector::preprocess ()
 
 	double inputRange = maximalGrayValue - minimalGrayValue;
 
-	double alpha = 1.0 / inputRange; // alpha expands current range. MaxGray will be 255
+	double alpha = 1.0/inputRange; // alpha expands current range. MaxGray will be 255
 	double beta = -minimalGrayValue * alpha;    // beta shifts current range so that minGray will go to 0
 
 	temporaryImage.convertTo ( temporaryImage, -1, alpha, beta );
@@ -54,11 +53,11 @@ cv::Mat ObjectDetector::preprocess ()
 }
 
 
-std::vector<cv::Point>  ObjectDetector::detectROI ( const cv::Mat & preprocessedImage )
+std::vector<cv::Point>  ObjectDetector::detectROI ()
 {
 	std::vector<cv::Point>  foundNonBlackLocations;
 
-	cv::Mat temporaryImage;
+	cv::Mat temporaryImage, preprocessedImage(_preprocess());
 
 	preprocessedImage.convertTo ( temporaryImage, CV_8UC1 );
 
