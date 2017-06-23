@@ -1,79 +1,221 @@
 #include "ObjectDetector.h"
 
-using namespace colorSearching;
+#define DEBUG
+#include <iostream>
+
+using namespace imageAnalysis;
 
 ObjectDetector::ObjectDetector ()
-{ }
+{}
 
 ObjectDetector::ObjectDetector ( cv::Mat & image )
 {
-	_sourceImage = image;
+    _sourceImage = image;
 }
 
-cv::Mat ObjectDetector::getSourceImage ()
+imageAnalysis::ObjectDetector::ObjectDetector ( const ObjectDetector & newDetector )
 {
-	return _sourceImage;
+    _sourceImage = newDetector.getSourceImage ();
+
+    windowName = newDetector.windowName;
+
+    rectangleState = newDetector.rectangleState;
+}
+
+cv::Mat ObjectDetector::getSourceImage () const
+{
+    return _sourceImage;
 }
 
 void ObjectDetector::setSourceImage ( const cv::Mat & newImage )
 {
-	_sourceImage = newImage;
+    _sourceImage = newImage;
 }
 
-cv::Mat ObjectDetector::_preprocess ()
+cv::Mat ObjectDetector::detectObject ()
 {
-	cv::Mat temporaryImage ( _sourceImage );
+    cv::Mat backgroundPixels, foregroundPixels, foregroundOnlyMask;
 
-	cv::ColorConversionCodes conversionCode = _hasAlphaChanel ? cv::ColorConversionCodes::COLOR_BGRA2GRAY : cv::ColorConversionCodes::COLOR_BGR2GRAY;
+    if ( !_sourceImage.empty () && !mask.empty () && boundingRectangle.area () != 0 )
+    {
+        cv::grabCut ( _sourceImage, mask, boundingRectangle, backgroundPixels, foregroundPixels, 1, cv::GC_INIT_WITH_MASK );
+    }
+    else
+    {
+        return _sourceImage;
+    }
 
-	//Converts image to grayscale
-	cv::cvtColor ( temporaryImage, temporaryImage, cv::ColorConversionCodes::COLOR_BGR2GRAY );
+    foregroundOnlyMask = mask & 1;
 
-	cv::GaussianBlur ( temporaryImage, temporaryImage, cv::Size ( 3, 3 ), 0 );
+    cv::Mat foreground ( _sourceImage.size (), CV_8UC3, cv::Scalar ( 255, 255, 255 ) );
 
-	double minimalGrayValue, maximalGrayValue;
+    _sourceImage.copyTo ( foreground, foregroundOnlyMask );
 
-	cv::minMaxLoc ( temporaryImage, &minimalGrayValue, &maximalGrayValue );
+    //-----------------------
+    //ONLY FOR DEBUG PURPOSES
+    //-----------------------
+#ifdef DEBUG
+    cv::imshow ( windowName, foreground );
 
-	//Magic number specified after number of tests to give the most accurate, yet undistorted result
-	minimalGrayValue = 0.4555;
+    cv::waitKey ();
+#endif // DEBUG
 
-	double inputRange = maximalGrayValue - minimalGrayValue;
-
-	double alpha = 1.0/inputRange; // alpha expands current range. MaxGray will be 255
-	double beta = -minimalGrayValue * alpha;    // beta shifts current range so that minGray will go to 0
-
-	temporaryImage.convertTo ( temporaryImage, -1, alpha, beta );
-
-	cv::morphologyEx ( temporaryImage, temporaryImage, cv::MORPH_CLOSE, cv::getStructuringElement ( cv::MORPH_RECT, cv::Size2d ( 21, 21 ) ) );
-
-	cv::threshold ( temporaryImage, temporaryImage, 0, 255, cv::THRESH_BINARY );
-
-	return temporaryImage;
-}
-
-
-std::vector<cv::Point>  ObjectDetector::detectROI ()
-{
-	std::vector<cv::Point>  foundNonBlackLocations;
-
-	cv::Mat temporaryImage, preprocessedImage(_preprocess());
-
-	preprocessedImage.convertTo ( temporaryImage, CV_8UC1 );
-
-	for ( int i = 0; i < temporaryImage.rows; ++i )
-	{
-		for ( int j = 0; j < temporaryImage.cols; j++ )
-		{
-			if ( temporaryImage.at<uchar> ( i, j ) == 0 )
-			{
-				foundNonBlackLocations.push_back ( cv::Point ( i, j ) );
-			}
-		}
-	}
-
-	return foundNonBlackLocations;
+    return foreground;
 }
 
 ObjectDetector::~ObjectDetector ()
-{ }
+{}
+
+void imageAnalysis::ObjectDetector::selectROI ( std::string _windowName )
+{
+    std::cout << "\n====USAGE====\n" << "Select region in rectangle\nAdjust with lines using:\n\tShift key for foreground\n\tCtrl key for background\n";
+    mask = cv::Mat ( _sourceImage.size (), CV_8UC1 );
+
+    mask.setTo ( cv::Scalar::all ( cv::GrabCutClasses::GC_BGD ) );
+
+    displayedSelection = _sourceImage;
+
+    windowName = _windowName;
+
+    cv::namedWindow ( windowName );
+
+    cv::imshow ( windowName, _sourceImage );
+
+    rectangleState = SelectionState::STANDBY;
+
+    foregroundEdditingState = SelectionState::STANDBY;
+
+    backgroundEdditingState = SelectionState::STANDBY;
+
+    while ( true )
+    {
+        cv::setMouseCallback ( windowName, mouseCallback, this );
+
+        if ( cv::waitKey () )
+        {
+            break;
+        }
+    }
+}
+
+void imageAnalysis::mouseCallback ( int mouseEvent, int x, int y, int flags, void * userdata )
+{
+    ObjectDetector &detector ( *static_cast < ObjectDetector* > ( userdata ) );
+
+    switch ( mouseEvent )
+    {
+    case cv::MouseEventTypes::EVENT_LBUTTONDOWN:
+    {
+        if ( flags & cv::MouseEventFlags::EVENT_FLAG_CTRLKEY )
+        {
+            if ( detector.backgroundEdditingState != SelectionState::PROCESSED )
+            {
+                detector.backgroundEdditingState = SelectionState::PROCESSED;
+            }
+        }
+        else
+            if ( flags & cv::MouseEventFlags::EVENT_FLAG_SHIFTKEY )
+            {
+                if ( detector.foregroundEdditingState != SelectionState::PROCESSED )
+                {
+                    detector.foregroundEdditingState = SelectionState::PROCESSED;
+                }
+            }
+            else
+                if ( detector.rectangleState != SelectionState::PROCESSED )
+                {
+                    detector.startingRectanglePoint = cv::Point ( x, y );
+
+                    detector.rectangleState = SelectionState::PROCESSED;
+                }
+
+        break;
+    }
+    case cv::MouseEventTypes::EVENT_MOUSEMOVE:
+    {
+        if ( detector.rectangleState == SelectionState::PROCESSED )
+        {
+            cv::Mat tmp ( detector.getSourceImage ().clone () );
+
+            detector.finalRectanglePoint = cv::Point ( x, y );
+
+            cv::rectangle ( tmp, detector.startingRectanglePoint, detector.finalRectanglePoint, cv::Scalar ( 0, 255, 0 ), 1 );
+
+            detector.displayedSelection = tmp;
+
+            cv::imshow ( detector.windowName, tmp );
+        }
+        else
+        {
+            if ( detector.backgroundEdditingState == SelectionState::PROCESSED || detector.foregroundEdditingState == SelectionState::PROCESSED )
+            {
+                detector.setMaskValue ( flags, cv::Point ( x, y ) );
+
+                cv::Scalar color = ( flags & cv::MouseEventFlags::EVENT_FLAG_CTRLKEY ) ? cv::Scalar ( 0, 255, 0 ) : cv::Scalar ( 0, 0, 255 );
+
+                cv::circle ( detector.displayedSelection, cv::Point ( x, y ), 1, color );
+
+                cv::imshow ( detector.windowName, detector.displayedSelection );
+            }
+        }
+
+        break;
+    }
+    case cv::MouseEventTypes::EVENT_LBUTTONUP:
+    {
+        if ( detector.rectangleState == SelectionState::PROCESSED )
+        {
+            detector.finalRectanglePoint = cv::Point ( x, y );
+
+            bool invalidRectangleX = ( detector.startingRectanglePoint.x > detector.finalRectanglePoint.x );
+            bool invalidRectangleY = ( detector.startingRectanglePoint.y > detector.finalRectanglePoint.y );
+
+            if ( invalidRectangleX )
+            {
+                std::swap ( detector.finalRectanglePoint.x, detector.startingRectanglePoint.x );
+            }
+            if ( invalidRectangleY )
+            {
+                std::swap ( detector.finalRectanglePoint.y, detector.startingRectanglePoint.y );
+            }
+
+            detector.boundingRectangle = cv::Rect ( detector.startingRectanglePoint.x, detector.startingRectanglePoint.y, detector.finalRectanglePoint.x - detector.startingRectanglePoint.x, detector.finalRectanglePoint.y - detector.startingRectanglePoint.y );
+
+            detector.rectangleState = SelectionState::SET;
+
+            detector.mask ( detector.boundingRectangle ).setTo ( cv::GC_PR_FGD );
+        }
+        else
+        {
+            if ( detector.backgroundEdditingState == SelectionState::PROCESSED || detector.foregroundEdditingState == SelectionState::PROCESSED )
+            {
+                cv::Mat tmp ( detector.displayedSelection.clone () );
+
+                detector.setMaskValue ( flags, cv::Point ( x, y ) );
+
+                cv::imshow ( detector.windowName, tmp );
+
+                detector.backgroundEdditingState = detector.backgroundEdditingState == SelectionState::PROCESSED ? SelectionState::SET : detector.backgroundEdditingState;
+
+                detector.foregroundEdditingState = detector.foregroundEdditingState == SelectionState::PROCESSED ? SelectionState::SET : detector.foregroundEdditingState;
+            }
+        }
+        break;
+    }
+    default:
+        break;
+    }
+}
+
+void ObjectDetector::setMaskValue ( int flag, cv::Point location )
+{
+    if ( flag & cv::MouseEventFlags::EVENT_FLAG_CTRLKEY )
+    {
+        cv::rectangle ( mask, location, cv::Point ( location + cv::Point ( 1, 1 ) ), cv::GrabCutClasses::GC_BGD, -1 );
+    }
+
+    else if ( flag & cv::MouseEventFlags::EVENT_FLAG_SHIFTKEY )
+    {
+        cv::rectangle ( mask, location, cv::Point ( location + cv::Point ( 1, 1 ) ), cv::GrabCutClasses::GC_FGD, -1 );
+    }
+}

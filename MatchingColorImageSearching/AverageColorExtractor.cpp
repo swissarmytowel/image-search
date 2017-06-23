@@ -1,17 +1,15 @@
 #include "AverageColorExtractor.h"
 
-using namespace colorSearching;
-
-std::vector<cv::Scalar> AverageColorExtractor::nonBlackColors = std::vector<cv::Scalar> ();
+using namespace imageAnalysis;
 
 AverageColorExtractor::AverageColorExtractor ()
 { }
 
-AverageColorExtractor::AverageColorExtractor ( const cv::Mat &image, std::vector<cv::Point> nonBlackPixelsLocation )
+AverageColorExtractor::AverageColorExtractor ( const cv::Mat &image )
 {
 	_image = image;
 
-	_extractedAverageColor = calculateAverageColor ( nonBlackPixelsLocation );
+	_extractedAverageColor = calculateAverageColor ();
 }
 
 cv::Scalar AverageColorExtractor::getAverageColor ()
@@ -19,35 +17,38 @@ cv::Scalar AverageColorExtractor::getAverageColor ()
 	return _extractedAverageColor;
 }
 
-cv::Scalar AverageColorExtractor::calculateAverageColor ( std::vector<cv::Point> nonBlackPixelsLocation )
+cv::Scalar AverageColorExtractor::calculateAverageColor ( )
 {
-	cv::Scalar averageColor ( 0.0 );
+	cv::Scalar averageColor ( cv::Scalar::all(0.0) );
 
-	for ( auto &it : nonBlackPixelsLocation )
-	{
-		for ( int i = 0; i < 3; ++i )
-		{
-			averageColor [ i ] += static_cast< double >(_image.at<cv::Vec3f> ( it.x, it.y ) [ i ]);
-		}
-	}
+    cv::Vec3b white ( 255, 255, 255 );
 
-	averageColor /= static_cast< double >( nonBlackPixelsLocation.size () );
+    cv::Mat tmp;
+
+    cv::bilateralFilter ( _image, tmp, 9, 140, 140 );
+    double size = 0.0;
+
+    for ( size_t i = 0; i < tmp.rows; i++ )
+    {
+        for ( size_t j = 0; j < tmp.cols; j++ )
+        {
+            if ( tmp.at<cv::Vec3b> ( i, j ) != white )
+            {
+                for ( int k = 0; k < 3; ++k )
+                {
+                    averageColor[ k ] += static_cast< double >( tmp.at<cv::Vec3b> ( i, j )[ k ] / 255.0 );
+                }
+
+                size += 1.0;
+            }
+        }
+    }
+	averageColor /= size;
 
 	return averageColor;
 }
-
 
 AverageColorExtractor::~AverageColorExtractor ()
 { }
 
 
-cv::Mat AverageColorExtractor::getAverageColorPlate ()
-{
-	cv::Mat colorPlate ( cv::Size ( 200, 200 ), _image.type () );
-
-	colorPlate = _extractedAverageColor;
-
-	LABConverter converter ( colorPlate );
-
-	return converter.convert();
-}

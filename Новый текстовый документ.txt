@@ -1,0 +1,49 @@
+
+//cv::Mat tmp ( sampleImage.rows, sampleImage.cols, sampleImage.depth () );
+
+// //cv::bilateralFilter ( sampleImage, tmp, 9, 150, 150 );
+
+// //cv::pyrMeanShiftFiltering ( sampleImage, sampleImage, 35, 60 );
+// //cv::morphologyEx ( sampleImage, sampleImage, cv::MorphTypes::MORPH_OPEN, cv::getStructuringElement ( cv::MorphShapes::MORPH_ELLIPSE, cv::Size ( 11, 11 ) ) );
+
+// //cv::GaussianBlur ( sampleImage, sampleImage, cv::Size ( 5, 5 ), 1 );
+
+//// cv::medianBlur ( sampleImage, tmp, 5 );
+
+// findMatchingPixels ( tmp );
+
+// if ( !_matchingPixels.empty () && _matchingPixels.size () >= _pixelQuantityThreshold )
+// {
+//     std::pair<size_t, size_t> start = _matchingPixels.begin ()->first;
+//     std::pair<size_t, size_t> end = _matchingPixels.rbegin ()->first;
+
+//     _indexedResults.emplace ( it, std::make_pair ( std::make_pair ( start, end ), minDeltaE ) );
+// }
+// _matchingPixels.clear ();
+
+
+
+//minDeltaE = 1000000.0;//Just big enough, so that any delta would be lesser
+
+//for ( size_t i = 0; i < sampleImage.rows; i++ )
+//{
+//    for ( size_t j = 0; j < sampleImage.cols; j++ )
+//    {
+//        cv::Scalar pixel = sampleImage.at<cv::Vec3b> ( i, j ), labPixel;
+
+//        pixel /= 255.f; //Normalize to [0,1] channel value range
+
+//        std::unique_ptr<colorConvertions::ColorSpaceConverter> converter = std::make_unique<colorConvertions::LABConverter> ( pixel );
+
+//        labPixel = converter->convert ();
+
+//        imageAnalysis::ColorComparator comparator ( _averageColor, _deltaEThreshold );
+
+//        if ( comparator.checkCMCColorDifference ( labPixel ) )
+//        {
+//            minDeltaE = minDeltaE >= comparator.getDeltaE () ? comparator.getDeltaE () : minDeltaE;//find minimdl deltaE
+
+//            _matchingPixels.emplace ( std::make_pair ( i, j ), minDeltaE );
+//        }
+//    }
+//}

@@ -1,51 +1,30 @@
+#include "ImageSearchingCore.h"
+
+#include<opencv2/imgproc.hpp>
+
 #include <iostream>
 #include <string>
-#include <vector>
-
-#include "ObjectDetector.h"
-#include "AverageColorExtractor.h"
-
 
 int main ( int argc, char** argv )
 {
-	cv::Mat image;
+    if ( argc != 5 )
+    {
+        std::cerr << "Wrong number of arguments!\nUsage: <image name> <search_folder> <dE threshold> <display mode>\n"<<
+            "Display modes:\n\t1 - print image names\n\t2 - display images\n\t3 - display images with highlighting matching regions\n\t - display images with bounding boxes for matching regions\n";
+        return EXIT_FAILURE;
+    }
 
-	std::string imageName = "some image.jpg";
+    std::string imageName = argv[ 1 ];
 
-	try
-	{
-		image = cv::imread ( imageName );
+    cv::String imageFolder = argv[ 2 ];
 
-		if ( image.empty () )
-		{
-			throw  cv::Exception ( 0, " Can't read image \"" + imageName + "\" ", "int main ( int argc, char** argv ) ", "main.cpp", 17 );
-		}
-	}
-	catch ( cv::Exception error )
-	{
-		std::cerr << error.what () << std::endl;
+    double deltaThreshold = std::stod( argv[3] );
 
-		return EXIT_FAILURE;
-	}
+    unsigned short displayMode = std::stoi ( argv[ 4 ] );
 
-	cv::Mat temporaryImage;
+    SearchEngine eng ( imageName, imageFolder, deltaThreshold, displayMode );
 
-	image.convertTo ( temporaryImage, CV_32F, 1.f / 255.f );
+    eng.runSearch ();
 
-	colorSearching::ObjectDetector detector ( temporaryImage );
-
-	colorSearching::AverageColorExtractor extractor ( temporaryImage, detector.detectROI () );
-
-	cv::namedWindow ( "result", cv::WindowFlags::WINDOW_AUTOSIZE );
-
-	cv::namedWindow ( "source", cv::WINDOW_AUTOSIZE );
-
-	cv::imshow ( "result", ( extractor.getAverageColorPlate () ) );
-
-	cv::imshow ( "source", image );
-
-	cv::waitKey ();
-
-	return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
-

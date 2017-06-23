@@ -20,14 +20,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AverageColorExtractor.h" />
+    <ClInclude Include="ColorComparator.h" />
     <ClInclude Include="ColorSpaceConverter.h" />
+    <ClInclude Include="ImageSearchingCore.h" />
     <ClInclude Include="ObjectDetector.h" />
+    <ClInclude Include="SearchEngine.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AverageColorExtractor.cpp" />
+    <ClCompile Include="ColorComparator.cpp" />
     <ClCompile Include="ColorSpaceConverter.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ObjectDetector.cpp" />
+    <ClCompile Include="SearchEngine.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{ade060b9-33b3-422d-bb1f-86eaaf6ecb33}</ProjectGuid>
@@ -128,6 +133,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>C:\opencv\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -135,6 +141,9 @@
       <AdditionalLibraryDirectories>C:\opencv\build\x64\vc14\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opencv_world310.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>

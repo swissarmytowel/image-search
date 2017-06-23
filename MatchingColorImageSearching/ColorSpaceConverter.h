@@ -1,14 +1,11 @@
 #pragma once
 
 #include <vector>
+#include <math.h>
 
-#include "opencv2\core.hpp"
-#include "opencv2\world.hpp"
-#include "opencv2\highgui.hpp"
-#include "opencv2\imgproc.hpp"
-#include "opencv2\objdetect.hpp"
+#include <opencv2\opencv.hpp>
 
-namespace colorSearching
+namespace colorConvertions
 {
 	enum class ColorSpace
 	{
@@ -19,21 +16,28 @@ namespace colorSearching
 	{
 	public:
 		ColorSpaceConverter ();
-		ColorSpaceConverter ( const cv::Mat image, ColorSpace colorSpace ) : _sourceImage ( image.clone () ),
-			_colorSpace ( colorSpace ), _convertedImage ( image.clone () )
+		ColorSpaceConverter ( const cv::Scalar pixel, ColorSpace colorSpace ) : _sourcePixel ( pixel ),
+			_colorSpace ( colorSpace ), _convertedPixel ( pixel ), _whitePoint ( 95.047, 100.0, 108.883 )
 		{ };
 
-		virtual cv::Mat convert ( cv::Mat sourceImage ) = 0;
-		virtual cv::Mat convert () = 0;
+        void set (cv::Scalar pixel);
 
-		virtual cv::Mat convertBack () = 0;
-		virtual float pivot ( const float value ) = 0;
+		virtual cv::Scalar convert () = 0;
+
+		virtual cv::Scalar convertBack () = 0;
+
+        //cv::Scalar normalize (cv::Scalar value);
+
+		virtual double normalize ( const double value ) = 0;
+		virtual double denormalize ( const double value ) = 0;
 
 		virtual ~ColorSpaceConverter ();
 
 	protected:
-		cv::Mat _sourceImage;
-		cv::Mat _convertedImage;
+		cv::Scalar _sourcePixel;
+        cv::Scalar _convertedPixel;
+
+		cv::Scalar _whitePoint;
 
 		ColorSpace _colorSpace;
 	};
@@ -45,16 +49,16 @@ namespace colorSearching
 		{ };
 		XYZConverter ( const XYZConverter &newObject )
 		{ };
-		XYZConverter ( const cv::Mat &image ) :
-			ColorSpaceConverter ( image, ColorSpace::cieXYZ )
+		XYZConverter ( const cv::Scalar pixel ) :
+			ColorSpaceConverter ( pixel, ColorSpace::cieXYZ )
 		{ };
 
-		cv::Mat convert ( cv::Mat sourceImage ) override;
-		cv::Mat convert () override;
+        cv::Scalar convert () override;
 
-		cv::Mat convertBack () override;
-		
-		float pivot (const float value) override;
+		cv::Scalar convertBack () override;
+
+		double normalize ( const double value ) override;
+        double denormalize ( const double value ) override;
 
 		~XYZConverter ()
 		{ };
@@ -67,19 +71,36 @@ namespace colorSearching
 		{ };
 		LABConverter ( const LABConverter &newObject )
 		{ };
-		LABConverter ( const cv::Mat &image ) :
-			ColorSpaceConverter ( image, ColorSpace::cieLAB )
+		LABConverter ( const cv::Scalar &pixel ) :
+			ColorSpaceConverter ( pixel, ColorSpace::cieLAB )
 		{ };
 
-		cv::Mat convert ( cv::Mat sourceImage ) override;
-		cv::Mat convert () override;
+		cv::Scalar convert () override;
 
-		cv::Mat convertBack () override;
+		cv::Scalar convertBack () override;
 
-		float pivot ( const float value ) override;
+        double normalize ( const double value ) override;
+        double denormalize ( const double value ) override;
 
 		~LABConverter ()
 		{ };
 	};
+
+    class HSVConverter : public ColorSpaceConverter
+    {
+    public:
+        HSVConverter ()
+        {};
+        HSVConverter ( const cv::Scalar &pixel ) :
+            ColorSpaceConverter ( pixel, ColorSpace::cieLAB )
+        {};
+
+        cv::Scalar convert () override;
+
+        cv::Scalar convertBack () override;
+
+        double normalize ( const double value ) override;
+        double denormalize ( const double value ) override;
+    };
 }
 
