@@ -1,6 +1,7 @@
 #include "SearchEngine.h"
 
-SearchEngine::SearchEngine ( std::string sampleImageName, cv::String folderName, double deltaEThreshold,  unsigned short displayMode )
+SearchEngine::SearchEngine ( std::string sampleImageName, cv::String folderName, 
+                             double deltaEThreshold,  unsigned short displayMode )
 {
     try
     {
@@ -8,7 +9,8 @@ SearchEngine::SearchEngine ( std::string sampleImageName, cv::String folderName,
 
         if ( _referenceImage.empty () )
         {
-            throw  cv::Exception ( 0, " Can't read image \"" + sampleImageName + "\" ", "int main ( int argc, char** argv ) ", "SearchEngine.cpp", __LINE__ );
+            throw  cv::Exception ( 0, " Can't read image \"" + sampleImageName + "\" ",
+                                   "int main ( int argc, char** argv ) ", "SearchEngine.cpp", __LINE__ );
         }
     }
     catch ( cv::Exception error )
@@ -28,9 +30,7 @@ SearchEngine::SearchEngine ( std::string sampleImageName, cv::String folderName,
     cv::glob ( _folderName, _imageNamesFromFolder );
 
     _deltaEThreshold = deltaEThreshold;
-
     _displayMode = displayMode;
-
     _errorsOccured = false;
 }
 
@@ -46,7 +46,6 @@ void SearchEngine::preprocessSampleImage ()
         std::make_unique<colorConvertions::LABConverter> ( extractor.getAverageColor () );
 
     _averageColor = labConverter->convert ();
-
     _colorThreshold = cv::Scalar ( 40, 40, 40 ); //Hardcoded needs an improvement
 
     findColorBoundaries ();
@@ -55,13 +54,10 @@ void SearchEngine::preprocessSampleImage ()
 cv::Mat SearchEngine::getColorRegion ( const cv::Mat& image )
 {
     cv::Mat processedImage = image.clone();
-
     cv::Mat HSVImage, tmp, regionTemplate;
-
     cv::Mat morphologyStructure = cv::getStructuringElement ( cv::MORPH_RECT, cv::Size ( 11, 11 ) );
 
     cv::bilateralFilter ( processedImage, tmp, 9, 150, 150 );
-   
     cv::cvtColor ( tmp, HSVImage, cv::COLOR_BGR2HSV );
 
     cv::inRange ( HSVImage, _lowerPixelValueBoundary,  _upperPixelValueBoundary, regionTemplate );
@@ -70,7 +66,6 @@ cv::Mat SearchEngine::getColorRegion ( const cv::Mat& image )
     morphologyEx ( regionTemplate, regionTemplate, cv::MORPH_CLOSE, morphologyStructure );
 
     cv::Mat result ( image.size (), CV_8UC3, cv::Scalar ( 255, 255, 255 ) );
-
     image.copyTo ( result, regionTemplate );
 
     return result;
@@ -86,7 +81,6 @@ void SearchEngine::runSearch ()
     if ( !_errorsOccured )
     {
         preprocessSampleImage ();
-
         index ();
 
         DisplayMode mode;
@@ -241,10 +235,10 @@ bool SearchEngine::findMatchingPixels ( const cv::Mat sampleImage )
     {
         imageAnalysis::AverageColorExtractor extractor ( roi );
 
-        std::unique_ptr<colorConvertions::ColorSpaceConverter> converter = std::make_unique<colorConvertions::LABConverter> ( extractor.calculateAverageColor () );
+        std::unique_ptr<colorConvertions::ColorSpaceConverter> converter = 
+            std::make_unique<colorConvertions::LABConverter> ( extractor.calculateAverageColor () );
 
         imageAnalysis::ColorComparator comparator ( _averageColor, _deltaEThreshold );
-
         cv::Scalar pixel = converter->convert ();
 
         if ( comparator.checkCMCColorDifference ( pixel ) )
@@ -261,15 +255,12 @@ bool SearchEngine::findMatchingPixels ( const cv::Mat sampleImage )
 std::vector<std::vector<cv::Point>> SearchEngine::findEdges ( const cv::Mat roi )
 {
     std::vector < std::vector<cv::Point> > contours;
-
     std::vector<cv::Vec4i> hierarchy;
 
     cv::Mat processedImage = roi.clone (), edges;
 
     cv::GaussianBlur ( processedImage, processedImage, cv::Size ( 5, 5 ), 1 );
-
     cv::Canny ( processedImage, edges, 0, 255 );
-
     cv::findContours ( edges, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, cv::Point ( 0, 0 ) );
 
     return contours;

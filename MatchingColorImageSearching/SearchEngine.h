@@ -20,12 +20,14 @@ enum class DisplayMode
     DISPLAY_NAMES, DISPLAY_IMAGES, DISPLAY_IMAGES_HIGHLIGHTED, DISPLAY_BOUNDING_BOX
 };
 
+//------------------------------------------------------------------------
+//      Class implementing search routines
+//------------------------------------------------------------------------
 class SearchEngine
 {
 public:
     SearchEngine ()
     {};
-
     SearchEngine ( std::string sampleImageName, cv::String folderName, double deltaEThreshold,  unsigned short displayMode );
 
     void runSearch ();
@@ -49,7 +51,6 @@ private:
     void preprocessSampleImage ();
 
     cv::Mat getColorRegion ( const cv::Mat& image );
-
     cv::Mat getReferenceImage ();
 
     cv::Mat _referenceImage;
@@ -70,7 +71,6 @@ private:
     cv::Scalar _colorThreshold;
 
     bool checkRange ( const cv::Scalar labpixel );
-
 
     double _deltaEThreshold;
 

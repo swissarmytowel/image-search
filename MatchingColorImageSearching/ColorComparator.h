@@ -6,16 +6,22 @@
 
 namespace imageAnalysis
 {
+    //------------------------------------------------------------------------
+    //  Class implementing color comparation using CMC[l:c] collor difference
+    //------------------------------------------------------------------------
     class ColorComparator
     {
     public:
-        ColorComparator () : _standartColor ( cv::Scalar::all ( 0.0 ) ), _deltaEThreshold(8.0)
+        ColorComparator () : 
+            _standartColor ( cv::Scalar::all ( 0.0 ) ), _deltaEThreshold(8.0)
         {};
 
-        ColorComparator ( const cv::Scalar &color ) : _standartColor ( color ), _deltaEThreshold(8.0)
+        ColorComparator ( const cv::Scalar &color ) :
+            _standartColor ( color ), _deltaEThreshold(8.0)
         {};
 
-        ColorComparator ( const cv::Scalar &color, const double deltaEThreshold ) : _standartColor ( color ), _deltaEThreshold(deltaEThreshold)
+        ColorComparator ( const cv::Scalar &color, const double deltaEThreshold ) :
+            _standartColor ( color ), _deltaEThreshold(deltaEThreshold)
         {};
 
         cv::Scalar getBaseColor ();
@@ -25,7 +31,8 @@ namespace imageAnalysis
         void displayColorPlate ();
 
         bool checkCMCColorDifference ( const cv::Scalar sampleColor );
-
+        
+        //Additional color comaparison method
         bool checkEuclideanDifference ( const cv::Scalar sampleColor );
 
         double getDeltaE ();

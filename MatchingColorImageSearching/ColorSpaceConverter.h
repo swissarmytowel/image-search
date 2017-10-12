@@ -11,22 +11,24 @@ namespace colorConvertions
 	{
 		cieLAB, BGR, cieXYZ
 	};
-
+    
+    //------------------------------------------------------------------------
+    //      Class implementing abstract color space convertion interface
+    //------------------------------------------------------------------------
 	class ColorSpaceConverter
 	{
 	public:
 		ColorSpaceConverter ();
-		ColorSpaceConverter ( const cv::Scalar pixel, ColorSpace colorSpace ) : _sourcePixel ( pixel ),
-			_colorSpace ( colorSpace ), _convertedPixel ( pixel ), _whitePoint ( 95.047, 100.0, 108.883 )
+		ColorSpaceConverter ( const cv::Scalar pixel, ColorSpace colorSpace ) : 
+            _sourcePixel ( pixel ),
+			_colorSpace ( colorSpace ), _convertedPixel ( pixel ),
+            _whitePoint ( 95.047, 100.0, 108.883 )
 		{ };
 
         void set (cv::Scalar pixel);
 
 		virtual cv::Scalar convert () = 0;
-
 		virtual cv::Scalar convertBack () = 0;
-
-        //cv::Scalar normalize (cv::Scalar value);
 
 		virtual double normalize ( const double value ) = 0;
 		virtual double denormalize ( const double value ) = 0;
@@ -42,6 +44,9 @@ namespace colorConvertions
 		ColorSpace _colorSpace;
 	};
 
+    //------------------------------------------------------------------------
+    //                  Derived classes
+    //------------------------------------------------------------------------
 	class XYZConverter : public ColorSpaceConverter
 	{
 	public:

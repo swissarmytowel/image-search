@@ -19,14 +19,12 @@ void imageAnalysis::ColorComparator::displayColorPlate ()
     plate = _standartColor;
 
     cv::imshow ( "Base color", plate );
-
     cv::waitKey ();
 }
 
 bool imageAnalysis::ColorComparator::checkCMCColorDifference ( const cv::Scalar sampleColor )
 {
     //Pixel data
-
     double referenceL = _standartColor[ 0 ];
     double referenceA = _standartColor[ 1 ];
     double referenceB = _standartColor[ 2 ];
@@ -106,7 +104,6 @@ double imageAnalysis::ColorComparator::getDeltaE ()
 {
     return _deltaE;
 }
-
 
 ColorComparator::~ColorComparator ()
 {}

@@ -8,6 +8,9 @@
 
 namespace imageAnalysis
 {
+    //------------------------------------------------------------------------
+    //          Class for extracting average color from image
+    //------------------------------------------------------------------------
 	class AverageColorExtractor
 	{
 	public:

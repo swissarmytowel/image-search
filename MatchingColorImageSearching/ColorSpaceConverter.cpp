@@ -10,7 +10,6 @@ void colorConvertions::ColorSpaceConverter::set ( cv::Scalar pixel )
     _sourcePixel = pixel;
 }
 
-
 ColorSpaceConverter::~ColorSpaceConverter ()
 {}
 
@@ -38,7 +37,9 @@ cv::Scalar LABConverter::convertBack ()
         z ( y - _convertedPixel[ 2 ] / 200.0 );
 
     _sourcePixel[ 0 ] = ( _whitePoint[ 0 ] )* ( denormalize ( x ) );
-    _sourcePixel[ 1 ] = ( _whitePoint[ 1 ] ) * ( _convertedPixel[ 0 ] > ( 0.008856 ) ? pow ( ( _convertedPixel[ 0 ] + 16.0 ) / 116.0, 3 ) : _convertedPixel[ 0 ] );
+    _sourcePixel[ 1 ] = ( _whitePoint[ 1 ] ) * ( _convertedPixel[ 0 ] > ( 0.008856 ) ? 
+                                                 pow ( ( _convertedPixel[ 0 ] + 16.0 ) / 116.0, 3 ) :
+                                                 _convertedPixel[ 0 ] );
     _sourcePixel[ 2 ] = ( _whitePoint[ 2 ] ) * ( denormalize ( z ) );
 
     XYZConverter converter ( _sourcePixel );
@@ -73,7 +74,6 @@ cv::Scalar XYZConverter::convertBack ()
 {
     double x ( _convertedPixel[ 0 ] / 100.0 ), y ( _convertedPixel[ 1 ] / 100.0 ),
         z ( _convertedPixel[ 2 ] / 100.0 );
-
 
     _convertedPixel[ 2 ] = denormalize ( x * 3.2406 - 1.5372 * y - 0.4986 *z );
     _convertedPixel[ 1 ] = denormalize ( -x * 0.9689 + y * 1.8758 + z * 0.0415 );

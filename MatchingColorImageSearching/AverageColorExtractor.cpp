@@ -8,7 +8,6 @@ AverageColorExtractor::AverageColorExtractor ()
 AverageColorExtractor::AverageColorExtractor ( const cv::Mat &image )
 {
 	_image = image;
-
 	_extractedAverageColor = calculateAverageColor ();
 }
 

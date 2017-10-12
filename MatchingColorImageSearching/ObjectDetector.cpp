@@ -1,7 +1,9 @@
+#include <iostream>
+
 #include "ObjectDetector.h"
 
 #define DEBUG
-#include <iostream>
+
 
 using namespace imageAnalysis;
 
@@ -16,9 +18,7 @@ ObjectDetector::ObjectDetector ( cv::Mat & image )
 imageAnalysis::ObjectDetector::ObjectDetector ( const ObjectDetector & newDetector )
 {
     _sourceImage = newDetector.getSourceImage ();
-
     windowName = newDetector.windowName;
-
     rectangleState = newDetector.rectangleState;
 }
 
@@ -38,7 +38,8 @@ cv::Mat ObjectDetector::detectObject ()
 
     if ( !_sourceImage.empty () && !mask.empty () && boundingRectangle.area () != 0 )
     {
-        cv::grabCut ( _sourceImage, mask, boundingRectangle, backgroundPixels, foregroundPixels, 1, cv::GC_INIT_WITH_MASK );
+        cv::grabCut ( _sourceImage, mask, boundingRectangle, 
+                      backgroundPixels, foregroundPixels, 1, cv::GC_INIT_WITH_MASK );
     }
     else
     {
@@ -51,9 +52,6 @@ cv::Mat ObjectDetector::detectObject ()
 
     _sourceImage.copyTo ( foreground, foregroundOnlyMask );
 
-    //-----------------------
-    //ONLY FOR DEBUG PURPOSES
-    //-----------------------
 #ifdef DEBUG
     cv::imshow ( windowName, foreground );
 
@@ -68,23 +66,21 @@ ObjectDetector::~ObjectDetector ()
 
 void imageAnalysis::ObjectDetector::selectROI ( std::string _windowName )
 {
-    std::cout << "\n====USAGE====\n" << "Select region in rectangle\nAdjust with lines using:\n\tShift key for foreground\n\tCtrl key for background\n";
-    mask = cv::Mat ( _sourceImage.size (), CV_8UC1 );
+    std::cout << "\n====USAGE====\n" << 
+        "Select region in rectangle\nAdjust with lines using:\n\t" <<
+        "Shift key for foreground\n\tCtrl key for background\n";
 
+    mask = cv::Mat ( _sourceImage.size (), CV_8UC1 );
     mask.setTo ( cv::Scalar::all ( cv::GrabCutClasses::GC_BGD ) );
 
     displayedSelection = _sourceImage;
-
     windowName = _windowName;
 
     cv::namedWindow ( windowName );
-
     cv::imshow ( windowName, _sourceImage );
 
     rectangleState = SelectionState::STANDBY;
-
     foregroundEdditingState = SelectionState::STANDBY;
-
     backgroundEdditingState = SelectionState::STANDBY;
 
     while ( true )
@@ -139,7 +135,8 @@ void imageAnalysis::mouseCallback ( int mouseEvent, int x, int y, int flags, voi
 
             detector.finalRectanglePoint = cv::Point ( x, y );
 
-            cv::rectangle ( tmp, detector.startingRectanglePoint, detector.finalRectanglePoint, cv::Scalar ( 0, 255, 0 ), 1 );
+            cv::rectangle ( tmp, detector.startingRectanglePoint, 
+                            detector.finalRectanglePoint, cv::Scalar ( 0, 255, 0 ), 1 );
 
             detector.displayedSelection = tmp;
 
@@ -147,11 +144,15 @@ void imageAnalysis::mouseCallback ( int mouseEvent, int x, int y, int flags, voi
         }
         else
         {
-            if ( detector.backgroundEdditingState == SelectionState::PROCESSED || detector.foregroundEdditingState == SelectionState::PROCESSED )
+            if ( detector.backgroundEdditingState == SelectionState::PROCESSED ||
+                 detector.foregroundEdditingState == SelectionState::PROCESSED )
             {
                 detector.setMaskValue ( flags, cv::Point ( x, y ) );
 
-                cv::Scalar color = ( flags & cv::MouseEventFlags::EVENT_FLAG_CTRLKEY ) ? cv::Scalar ( 0, 255, 0 ) : cv::Scalar ( 0, 0, 255 );
+                cv::Scalar color = 
+                    ( flags & cv::MouseEventFlags::EVENT_FLAG_CTRLKEY ) ?
+                                                                        cv::Scalar ( 0, 255, 0 ) :
+                                                                        cv::Scalar ( 0, 0, 255 );
 
                 cv::circle ( detector.displayedSelection, cv::Point ( x, y ), 1, color );
 
@@ -179,7 +180,10 @@ void imageAnalysis::mouseCallback ( int mouseEvent, int x, int y, int flags, voi
                 std::swap ( detector.finalRectanglePoint.y, detector.startingRectanglePoint.y );
             }
 
-            detector.boundingRectangle = cv::Rect ( detector.startingRectanglePoint.x, detector.startingRectanglePoint.y, detector.finalRectanglePoint.x - detector.startingRectanglePoint.x, detector.finalRectanglePoint.y - detector.startingRectanglePoint.y );
+            detector.boundingRectangle = cv::Rect ( detector.startingRectanglePoint.x, 
+                                                    detector.startingRectanglePoint.y, 
+                                                    detector.finalRectanglePoint.x - detector.startingRectanglePoint.x, 
+                                                    detector.finalRectanglePoint.y - detector.startingRectanglePoint.y );
 
             detector.rectangleState = SelectionState::SET;
 
@@ -187,7 +191,8 @@ void imageAnalysis::mouseCallback ( int mouseEvent, int x, int y, int flags, voi
         }
         else
         {
-            if ( detector.backgroundEdditingState == SelectionState::PROCESSED || detector.foregroundEdditingState == SelectionState::PROCESSED )
+            if ( detector.backgroundEdditingState == SelectionState::PROCESSED ||
+                 detector.foregroundEdditingState == SelectionState::PROCESSED )
             {
                 cv::Mat tmp ( detector.displayedSelection.clone () );
 
@@ -195,9 +200,15 @@ void imageAnalysis::mouseCallback ( int mouseEvent, int x, int y, int flags, voi
 
                 cv::imshow ( detector.windowName, tmp );
 
-                detector.backgroundEdditingState = detector.backgroundEdditingState == SelectionState::PROCESSED ? SelectionState::SET : detector.backgroundEdditingState;
+                detector.backgroundEdditingState = 
+                    detector.backgroundEdditingState == SelectionState::PROCESSED ?
+                    SelectionState::SET : 
+                    detector.backgroundEdditingState;
 
-                detector.foregroundEdditingState = detector.foregroundEdditingState == SelectionState::PROCESSED ? SelectionState::SET : detector.foregroundEdditingState;
+                detector.foregroundEdditingState = 
+                    detector.foregroundEdditingState == SelectionState::PROCESSED ? 
+                    SelectionState::SET :
+                    detector.foregroundEdditingState;
             }
         }
         break;
