@@ -6,47 +6,47 @@
 
 namespace imageAnalysis
 {
-    //------------------------------------------------------------------------
-    //  Class implementing color comparation using CMC[l:c] collor difference
-    //------------------------------------------------------------------------
-    class ColorComparator
-    {
-    public:
-        ColorComparator () : 
-            _standartColor ( cv::Scalar::all ( 0.0 ) ), _deltaEThreshold(8.0)
-        {};
+//------------------------------------------------------------------------
+//  Class implementing color comparation using CMC[l:c] collor difference
+//------------------------------------------------------------------------
+	class ColorComparator
+	{
+	public:
+		ColorComparator () :
+			_standartColor ( cv::Scalar::all ( 0.0 ) ), _deltaEThreshold ( 8.0 )
+		{};
 
-        ColorComparator ( const cv::Scalar &color ) :
-            _standartColor ( color ), _deltaEThreshold(8.0)
-        {};
+		ColorComparator ( const cv::Scalar &color ) :
+			_standartColor ( color ), _deltaEThreshold ( 8.0 )
+		{};
 
-        ColorComparator ( const cv::Scalar &color, const double deltaEThreshold ) :
-            _standartColor ( color ), _deltaEThreshold(deltaEThreshold)
-        {};
+		ColorComparator ( const cv::Scalar &color, const double deltaEThreshold ) :
+			_standartColor ( color ), _deltaEThreshold ( deltaEThreshold )
+		{};
 
-        cv::Scalar getBaseColor ();
+		cv::Scalar getBaseColor ();
 
-        void setBaseColor ( cv::Scalar color );
+		void setBaseColor ( cv::Scalar color );
 
-        void displayColorPlate ();
+		void displayColorPlate ();
 
-        bool checkCMCColorDifference ( const cv::Scalar sampleColor );
-        
-        //Additional color comaparison method
-        bool checkEuclideanDifference ( const cv::Scalar sampleColor );
+		bool checkCMCColorDifference ( const cv::Scalar sampleColor );
 
-        double getDeltaE ();
+		//Additional color comaparison method
+		bool checkEuclideanDifference ( const cv::Scalar sampleColor );
 
-        ~ColorComparator ();
+		double getDeltaE ();
 
-    private:
-        double calculateMagnitude ( const double first, const double second );
+		~ColorComparator ();
 
-        double calculateMagnitude ( const double first, const double second, const double third );
+	private:
+		double calculateMagnitude ( const double first, const double second );
+		double calculateMagnitude ( const double first, const double second, const double third );
 
-        cv::Scalar _standartColor;
-        double _deltaEThreshold;
-        double _deltaE;
-    };
+		cv::Scalar _standartColor;
+
+		double _deltaEThreshold;
+		double _deltaE;
+	};
 }
 

@@ -8,9 +8,9 @@
 
 namespace imageAnalysis
 {
-    //------------------------------------------------------------------------
-    //          Class for extracting average color from image
-    //------------------------------------------------------------------------
+//------------------------------------------------------------------------
+//          Class for extracting average color from image
+//------------------------------------------------------------------------
 	class AverageColorExtractor
 	{
 	public:
@@ -20,7 +20,7 @@ namespace imageAnalysis
 
 		cv::Scalar getAverageColor ();
 
-		cv::Scalar calculateAverageColor ( );
+		cv::Scalar calculateAverageColor ();
 
 		~AverageColorExtractor ();
 

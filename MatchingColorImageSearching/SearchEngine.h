@@ -17,7 +17,7 @@
 
 enum class DisplayMode
 {
-    DISPLAY_NAMES, DISPLAY_IMAGES, DISPLAY_IMAGES_HIGHLIGHTED, DISPLAY_BOUNDING_BOX
+	DISPLAY_NAMES, DISPLAY_IMAGES, DISPLAY_IMAGES_HIGHLIGHTED, DISPLAY_BOUNDING_BOX
 };
 
 //------------------------------------------------------------------------
@@ -26,56 +26,56 @@ enum class DisplayMode
 class SearchEngine
 {
 public:
-    SearchEngine ()
-    {};
-    SearchEngine ( std::string sampleImageName, cv::String folderName, double deltaEThreshold,  unsigned short displayMode );
+	SearchEngine ()
+	{};
+	SearchEngine ( std::string sampleImageName, cv::String folderName, double deltaEThreshold, unsigned short displayMode );
 
-    void runSearch ();
+	void runSearch ();
 
-    void displayResults (DisplayMode mode);
+	void displayResults ( DisplayMode mode );
 
-    ~SearchEngine ()
-    {};
+	~SearchEngine ()
+	{};
 
 private:
-    bool findMatchingPixels ( const cv::Mat sampleImage );
+	bool findMatchingPixels ( const cv::Mat sampleImage );
 
-    std::vector<std::vector<cv::Point>> findEdges ( const cv::Mat roi );
+	std::vector<std::vector<cv::Point>> findEdges ( const cv::Mat roi );
 
-    void findColorBoundaries ();
+	void findColorBoundaries ();
 
-    void index ();
+	void index ();
 
-    void applyThreshold ( const cv::Scalar  pixel );
+	void applyThreshold ( const cv::Scalar  pixel );
 
-    void preprocessSampleImage ();
+	void preprocessSampleImage ();
 
-    cv::Mat getColorRegion ( const cv::Mat& image );
-    cv::Mat getReferenceImage ();
+	cv::Mat getColorRegion ( const cv::Mat& image );
+	cv::Mat getReferenceImage ();
 
-    cv::Mat _referenceImage;
+	cv::Mat _referenceImage;
 
-    cv::String _folderName;
-    
-    cv::Scalar _averageColor;
+	cv::String _folderName;
 
-    std::map<cv::String, std::vector<std::vector<cv::Point>>> indexedImages;
+	cv::Scalar _averageColor;
 
-    std::vector<std::vector<cv::Point>> edges;
+	std::map<cv::String, std::vector<std::vector<cv::Point>>> indexedImages;
 
-    std::vector<cv::String> _imageNamesFromFolder;
+	std::vector<std::vector<cv::Point>> edges;
 
-    cv::Scalar _lowerPixelValueBoundary;
-    cv::Scalar _upperPixelValueBoundary;
+	std::vector<cv::String> _imageNamesFromFolder;
 
-    cv::Scalar _colorThreshold;
+	cv::Scalar _lowerPixelValueBoundary;
+	cv::Scalar _upperPixelValueBoundary;
 
-    bool checkRange ( const cv::Scalar labpixel );
+	cv::Scalar _colorThreshold;
 
-    double _deltaEThreshold;
+	bool checkRange ( const cv::Scalar labpixel );
 
-    unsigned short _displayMode;
+	double _deltaEThreshold;
 
-    bool _errorsOccured;
+	unsigned short _displayMode;
+
+	bool _errorsOccured;
 };
 
